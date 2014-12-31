@@ -1,15 +1,15 @@
 __author__ = 'jonathan'
 
 from pprint import pprint
-
-from memebot_config import BOT_LOGIN_PASSWORD
-
+from memebot_config import *
 import praw
+import utils
+import re
 
 
-CORPUS_PATH= "/var/memebot"
 
 BUCKET_THRESHOLDS=[-10,   \
+                   -9,   \
                    -1,   \
                     1,   \
                     2,   \
@@ -40,24 +40,46 @@ def get_bucket_path( karma ):
 
 def get_thresholds_path( threshold_value_lower, threshold_value_upper ):
     bucket_path = CORPUS_PATH + "/";
-    if threshold_value_lower is not None:
-        bucket_path +=  str( threshold_value_lower ).replace( "-", "neg_");
 
-    if threshold_value_lower is not None and threshold_value_upper is not None:
-        bucket_path += "-";
+    if threshold_value_lower is not None:
+        bucket_path +=  str( threshold_value_lower ).replace( "-", "_neg_");
+
+    if threshold_value_lower is threshold_value_upper:
+        return bucket_path;
+    elif threshold_value_lower is not None:
+        bucket_path += "-"
 
     if threshold_value_upper is not None:
-        bucket_path += str( threshold_value_upper ).replace( "-", "neg_")
+        bucket_path += str( threshold_value_upper - 1 ).replace( "-", "_neg_")
+
+    if threshold_value_lower is None:
+        bucket_path += "+"
 
     return bucket_path;
+
+def write_comment_to_corpus( flattened_comment ):
+    cdir = get_bucket_path( flattened_comment.ups - flattened_comment.downs );
+    fname = cdir + "/" + comment.id;
+
+    comment_text = comment.body.encode('ascii', 'ignore');
+    comment_text = re.sub("&gt;.*?(\n|$)", "", comment_text) # remove quoted content
+    comment_text = comment_text.replace("\n"," ")
+    if len(comment_text) > 0:
+        utils.ensure_dir(fname)
+        f = open(fname, 'w')
+        f.write( comment_text )
+        f.close();
+
 
 if __name__ == '__main__':
     news_subreddit = bot.get_subreddit('news');
     for submission in news_subreddit.get_hot(limit=3):
         if len(submission.comments) > 0:
-            for comment in praw.helpers.flatten_tree(submission.comments)[0:1]:
+            for comment in praw.helpers.flatten_tree(submission.comments):
                 #pprint( vars(comment) )
-                karma = comment.ups - comment.downs;
-                print comment.body
-                print '\t' + str(karma)
-                print '\t' + get_bucket_path(karma)
+                if not isinstance(comment, praw.objects.MoreComments):
+                    karma = comment.ups - comment.downs;
+                    print comment.body.replace( "\n", " ")
+                    print '\t' + str(karma)
+                    print '\t' + get_bucket_path(karma) + "\n"
+                    write_comment_to_corpus( comment )

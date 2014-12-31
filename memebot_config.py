@@ -1,3 +1,3 @@
 BOT_LOGIN_PASSWORD="PASSWORD"
-
+CORPUS_PATH= "/var/memebot"
 
