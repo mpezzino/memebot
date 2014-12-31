@@ -2,10 +2,9 @@ __author__ = 'jonathan'
 
 import os
 
-from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-from memebot_config import *
+import memebot_config
 
 
 def ensure_dir(f):
@@ -13,16 +12,8 @@ def ensure_dir(f):
     if not os.path.exists(d):
         os.makedirs(d)
 
-ensure_dir(CORPUS_PATH)
-
-def init_s3_connection():
-    access, secret = get_aws_credentials()
-    return S3Connection(access, secret)
-
-S3_CONNECTION=init_s3_connection()
-
 def get_s3_connection():
-    return S3_CONNECTION;
+    return memebot_config.S3_CONNECTION;
 
 def write_to_s3( obj_name, content ):
     s3 = get_s3_connection()
