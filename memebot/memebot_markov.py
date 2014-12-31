@@ -2,11 +2,10 @@ __author__ = 'jonathan'
 
 import random
 import os
-import nltk
-import sys
 
 from memebot_config import CORPUS_PATH
-import memebot_classifier
+from memebot import memebot_classifier
+
 
 class Markov(object):
 

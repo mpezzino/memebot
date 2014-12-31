@@ -1,14 +1,11 @@
 __author__ = 'jonathan'
 
-from pprint import pprint
-from memebot_config import *
-import praw
-import utils
 import re
 
-import boto
-from boto.s3.connection import S3Connection
+import praw
 
+import memebot_config
+import utils
 
 
 BUCKET_THRESHOLDS=[-10,   \
@@ -27,9 +24,9 @@ BUCKET_THRESHOLDS.sort();
 
 
 bot = praw.Reddit( 'memebot by /u/mr_jim_lahey' );
-bot.login(username=BOT_USERNAME, password=BOT_LOGIN_PASSWORD);
+bot.login(username=memebot_config.BOT_USERNAME, password=memebot_config.BOT_LOGIN_PASSWORD);
 
-def get_bucket_path( karma, corpus_root=CORPUS_PATH ):
+def get_bucket_path( karma, corpus_root=memebot_config.CORPUS_PATH ):
     if karma <= BUCKET_THRESHOLDS[0]:
         return get_thresholds_path( BUCKET_THRESHOLDS[0], None, corpus_root=corpus_root );
 
@@ -41,7 +38,7 @@ def get_bucket_path( karma, corpus_root=CORPUS_PATH ):
 
     return get_thresholds_path( None, BUCKET_THRESHOLDS[-1], corpus_root=corpus_root );
 
-def get_thresholds_path( threshold_value_lower, threshold_value_upper, corpus_root=CORPUS_PATH ):
+def get_thresholds_path( threshold_value_lower, threshold_value_upper, corpus_root=memebot_config.CORPUS_PATH ):
     bucket_path = corpus_root + "/";
 
     if threshold_value_lower is not None:
@@ -61,7 +58,7 @@ def get_thresholds_path( threshold_value_lower, threshold_value_upper, corpus_ro
     return bucket_path;
 
 def write_comment_to_corpus_s3( flattened_comment ):
-    write_comment_to_corpus(flattened_comment, corpus_root=S3_CORPUS_BUCKET, write_method=write_to_corpus_s3);
+    write_comment_to_corpus(flattened_comment, corpus_root=memebot_config.S3_CORPUS_BUCKET, write_method=write_to_corpus_s3);
 
 def write_to_corpus_local( fname, comment_text):
     utils.ensure_dir(fname)
@@ -73,7 +70,7 @@ def write_to_corpus_s3( fname, comment_text ):
     utils.write_to_s3(fname, comment_text)
 
 
-def write_comment_to_corpus( flattened_comment, corpus_root=CORPUS_PATH, write_method=write_to_corpus_local ):
+def write_comment_to_corpus( flattened_comment, corpus_root=memebot_config.CORPUS_PATH, write_method=write_to_corpus_local ):
     cdir = get_bucket_path( flattened_comment.ups - flattened_comment.downs, corpus_root=corpus_root );
     fname = cdir + "/" + comment.id;
 
@@ -87,7 +84,7 @@ def write_comment_to_corpus( flattened_comment, corpus_root=CORPUS_PATH, write_m
 
 if __name__ == '__main__':
     news_subreddit = bot.get_subreddit('news');
-    for submission in news_subreddit.get_hot(limit=1000):
+    for submission in news_subreddit.get_hot(limit=3):
         if len(submission.comments) > 0:
             for comment in praw.helpers.flatten_tree(submission.comments):
                 #pprint( vars(comment) )
@@ -95,5 +92,5 @@ if __name__ == '__main__':
                     karma = comment.ups - comment.downs;
                     print comment.body.replace( "\n", " ")
                     print '\t' + str(karma)
-                    print '\t' + get_bucket_path(karma, corpus_root=S3_CORPUS_BUCKET) + "\n"
+                    print '\t' + get_bucket_path(karma, corpus_root=memebot_config.S3_CORPUS_BUCKET) + "\n"
                     write_comment_to_corpus_s3( comment )

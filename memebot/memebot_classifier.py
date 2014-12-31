@@ -1,21 +1,18 @@
 # http://nbviewer.ipython.org/github/carljv/Will_it_Python/blob/master/MLFH/CH3/ch3_nltk.ipynb
 __author__ = 'jonathan'
 
-from pandas import *
-import numpy as np
 import os
 import sys
 import re
+from collections import defaultdict
+
 from nltk import NaiveBayesClassifier
-import nltk.classify
 from nltk.tokenize import wordpunct_tokenize
 from nltk.corpus import stopwords
-from collections import defaultdict
-from pprint import *
 from boto.s3.key import Key
 
 from memebot_config import *
-import utils
+from memebot import utils
 
 
 def get_msgdir(path):
@@ -126,7 +123,9 @@ def get_training_set_s3():
 
     comments_by_bucket = {}
 
-    for comment_obj in threshold_bucket.list():
+    comment_objs = threshold_bucket.list()
+    print "Found ", len(comment_objs), "comments"
+    for comment_obj in comment_objs:
         k.key = comment_obj
         comment_text = k.get_contents_as_string()
         threshold_bucket = comment_obj.name.split("/")[0]
@@ -134,8 +133,10 @@ def get_training_set_s3():
             comments_by_bucket[threshold_bucket] = []
         comments_by_bucket[threshold_bucket].append( comment_text )
 
+
     train_set = []
     for threshold_bucket in comments_by_bucket:
+        print len( comments_by_bucket[threshold_bucket] ) + "\tcomments with karma\t" + threshold_bucket
         train_set.extend(features_from_messages(comments_by_bucket[threshold_bucket], threshold_bucket,
                                                 word_indicator))
 

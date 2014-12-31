@@ -1,9 +1,12 @@
 __author__ = 'jonathan'
 
-from memebot_config import *
 import os
+
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
+
+from memebot_config import *
+
 
 def ensure_dir(f):
     d = os.path.dirname(f)

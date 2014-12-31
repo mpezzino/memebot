@@ -1,9 +1,12 @@
-__author__ = 'jonathan'
 
-import memebot_config
-import utils
+from setuptools import setup
+
 import sys
+
 from boto.s3.connection import Location
+
+from memebot import utils, memebot_config
+
 
 def creds_prop(key,val):
     return key + "=" + val + "\n";
@@ -12,13 +15,7 @@ def setup_s3_buckets():
     s3 = utils.get_s3_connection()
     s3.create_bucket(memebot_config.S3_CORPUS_BUCKET,location=Location.USWest2)
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == 's3':
-        setup_s3_buckets();
-        exit()
-    else:
-        print sys.argv[1]
-
+def setup_credentials_file():
     bot_username = raw_input("Bot username: /u/")
     bot_pw = raw_input("Bot password: ")
     access_key = raw_input("AWS Access Key: ")
@@ -37,8 +34,23 @@ if __name__ == '__main__':
     f.write(credentials_file_text)
     f.close()
 
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 's3':
+        setup_s3_buckets();
+        exit()
 
-    setup_s3_buckets()
+    setup(name='memebot',
+      version='0.1',
+      description='memebot',
+      url='https://github.com/softwareengineerprogrammer/memebot',
+      author='Breaux Gramm',
+      author_email='breaux@breauxgramm.in',
+      license='MIT',
+      packages=['memebot'],
+      install_requires=[
+          'praw',
+      ],
+      zip_safe=False)
 
 
 
