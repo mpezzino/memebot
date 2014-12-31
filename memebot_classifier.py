@@ -4,6 +4,7 @@ __author__ = 'jonathan'
 from pandas import *
 import numpy as np
 import os
+import sys
 import re
 from nltk import NaiveBayesClassifier
 import nltk.classify
@@ -11,8 +12,10 @@ from nltk.tokenize import wordpunct_tokenize
 from nltk.corpus import stopwords
 from collections import defaultdict
 from pprint import *
+from boto.s3.key import Key
 
-from memebot_config import CORPUS_PATH
+from memebot_config import *
+import utils
 
 
 def get_msgdir(path):
@@ -54,7 +57,9 @@ def get_msg_words(msg, sw=[], strip_html=False):
     a stopwords list that includes contraction parts, like 'don' and 't'.
     '''
 
-    if len(sw) is 0:
+    if sw is None:
+        sw = []
+    elif len(sw) is 0:
         sw = stopwords.words('english')
 
     # Strip out weird '3D' artefacts.
@@ -115,12 +120,35 @@ def word_indicator(msg, **kwargs):
         features[w] = True
     return features
 
+def get_training_set_s3():
+    threshold_bucket = utils.get_s3_connection().get_bucket(S3_CORPUS_BUCKET)
+    k = Key( threshold_bucket )
+
+    comments_by_bucket = {}
+
+    for comment_obj in threshold_bucket.list():
+        k.key = comment_obj
+        comment_text = k.get_contents_as_string()
+        threshold_bucket = comment_obj.name.split("/")[0]
+        if not comments_by_bucket.has_key(threshold_bucket):
+            comments_by_bucket[threshold_bucket] = []
+        comments_by_bucket[threshold_bucket].append( comment_text )
+
+    train_set = []
+    for threshold_bucket in comments_by_bucket:
+        train_set.extend(features_from_messages(comments_by_bucket[threshold_bucket], threshold_bucket,
+                                                word_indicator))
+
+    return train_set
+
 
 def get_training_set():
     data_path = CORPUS_PATH;
     comments_by_bucket = {}
     for cdir in os.listdir(data_path):
-        comments_by_bucket[cdir] = get_msgdir(os.path.join(data_path, cdir))
+        cdir_path = os.path.join(data_path, cdir)
+        if os.path.isdir( cdir_path ):
+            comments_by_bucket[cdir] = get_msgdir(cdir_path)
 
     train_set = []
     for bucket in comments_by_bucket:
@@ -129,11 +157,16 @@ def get_training_set():
 
     return train_set
 
+classifier = NaiveBayesClassifier.train(get_training_set_s3())
+
+def karma_classify( text ):
+    return classifier.classify(word_indicator(text))
 
 if __name__ == '__main__':
-    classifier = NaiveBayesClassifier.train(get_training_set())
     classifier.show_most_informative_features(50)
-    pprint(classifier.classify(word_indicator("Summonses for low-level offenses like public drinking and urination also plunged 94 percent  from 4,831 to 300. Even parking violations are way down, dropping by 92 percent, from 14,699 to 1,241. Drug arrests by cops assigned to the NYPDs Organized Crime Control Bureau  which are part of the overall number  dropped by 84 percent, from 382 to 63.          Not really seeing the downside ")))
+    while True:
+        sys.stdout.write("Comment: ")
+        print classifier.classify(word_indicator(raw_input()))
 
 
 
