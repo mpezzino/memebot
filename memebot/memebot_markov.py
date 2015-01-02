@@ -4,7 +4,7 @@ import random
 import os
 
 from memebot_config import CORPUS_PATH
-from memebot import memebot_classifier
+import memebot_classifier
 
 
 class Markov(object):

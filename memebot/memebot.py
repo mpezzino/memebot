@@ -84,7 +84,7 @@ def write_comment_to_corpus( flattened_comment, corpus_root=memebot_config.CORPU
 
 if __name__ == '__main__':
     news_subreddit = bot.get_subreddit('news');
-    for submission in news_subreddit.get_hot(limit=3):
+    for submission in news_subreddit.get_hot(limit=10000):
         if len(submission.comments) > 0:
             for comment in praw.helpers.flatten_tree(submission.comments):
                 #pprint( vars(comment) )

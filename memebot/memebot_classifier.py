@@ -124,19 +124,21 @@ def get_training_set_s3():
     comments_by_bucket = {}
 
     comment_objs = threshold_bucket.list()
-    print "Found ", len(comment_objs), "comments"
+
+    print "Getting training set from S3..."
     for comment_obj in comment_objs:
         k.key = comment_obj
         comment_text = k.get_contents_as_string()
         threshold_bucket = comment_obj.name.split("/")[0]
         if not comments_by_bucket.has_key(threshold_bucket):
             comments_by_bucket[threshold_bucket] = []
+            print "\tFound threshold bucket", threshold_bucket
         comments_by_bucket[threshold_bucket].append( comment_text )
 
 
     train_set = []
     for threshold_bucket in comments_by_bucket:
-        print len( comments_by_bucket[threshold_bucket] ) + "\tcomments with karma\t" + threshold_bucket
+        print str(len( comments_by_bucket[threshold_bucket] )) + "\tcomments with karma\t" + threshold_bucket
         train_set.extend(features_from_messages(comments_by_bucket[threshold_bucket], threshold_bucket,
                                                 word_indicator))
 

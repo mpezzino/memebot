@@ -11,6 +11,7 @@ setup(name='memebot',
       packages=['memebot'],
       install_requires=[
           'praw',
+          'nltk'
       ],
       zip_safe=False)
 
