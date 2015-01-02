@@ -22,6 +22,8 @@ BOT_USERNAME = get_credentials_property("bot.username")
 CORPUS_PATH= "/var/lib/memebot"
 S3_CORPUS_BUCKET=get_credentials_property("s3_corpus_bucket")
 
+CLASSIFIER_FILE_PATH=CORPUS_PATH+"/memebot_classifier.pkl"
+
 
 def get_aws_credentials():
     return get_credentials_property("access.key"), get_credentials_property("secret.key")

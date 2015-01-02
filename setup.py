@@ -11,7 +11,8 @@ setup(name='memebot',
       packages=['memebot'],
       install_requires=[
           'praw',
-          'nltk'
+          'simplejson',
+          'cherrypy'
       ],
       zip_safe=False)
 

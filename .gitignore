@@ -1,2 +1,6 @@
 .idea/
 *.pyc
+build/
+dist/
+memebot.egg-info/
+memebot/memebot.egg-info/

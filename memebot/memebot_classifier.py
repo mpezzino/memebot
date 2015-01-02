@@ -13,6 +13,7 @@ from boto.s3.key import Key
 
 from memebot_config import *
 from memebot import utils
+import pickle
 
 
 def get_msgdir(path):
@@ -160,12 +161,15 @@ def get_training_set():
 
     return train_set
 
-classifier = NaiveBayesClassifier.train(get_training_set_s3())
 
-def karma_classify( text ):
-    return classifier.classify(word_indicator(text))
+def karma_classify( a_classifier, text ):
+    return a_classifier.classify(word_indicator(text))
 
 if __name__ == '__main__':
+    classifier = NaiveBayesClassifier.train(get_training_set_s3())
+    classifier_file = open(CLASSIFIER_FILE_PATH,'wb')
+    pickle.dump(classifier, classifier_file)
+    classifier_file.close()
     classifier.show_most_informative_features(50)
     while True:
         sys.stdout.write("Comment: ")
