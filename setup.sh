@@ -11,6 +11,9 @@ sudo pip uninstall requests
 sudo mkdir /var/lib/memebot
 sudo chmod 777 /var/lib/memebot
 
-cd ..
+cd
 sudo python setup.py install
-python -c 'import ntlk; nltk.download("stopwords"); nltk.download("punkt")'
+sudo pip install -U nltk
+python -c 'import nltk; nltk.download("stopwords"); nltk.download("punkt")'
+
+sudo yum install tmux

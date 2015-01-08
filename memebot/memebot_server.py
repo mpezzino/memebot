@@ -16,4 +16,5 @@ class MemebotServer(object):
     def index(self,t):
         return memebot_classifier.karma_classify(classifier, t)
 
+cherrypy.config.update({'server.socket_host': '0.0.0.0'})
 cherrypy.quickstart(MemebotServer())#,'/','memebot_server.conf')

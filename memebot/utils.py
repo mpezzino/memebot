@@ -3,9 +3,10 @@ __author__ = 'jonathan'
 import os
 import simplejson
 from boto.s3.key import Key
+import pickle
 
 import memebot_config
-
+#from memebot_config import CLASSIFIER_FILE_PATH
 
 def ensure_dir(f):
     d = os.path.dirname(f)
@@ -37,4 +38,11 @@ def jsonp(func):
         return ret
     return foo
 
+"""
+def get_memebot_classifier():
+    classifier_file = open(CLASSIFIER_FILE_PATH,'rb')
+    classifier = pickle.load( classifier_file )
+    classifier_file.close()
+    return classifier
+"""
 
